@@ -1,0 +1,196 @@
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
+
+public class SimuladorAutomatoFinito {
+    private Set<Integer> estados;
+    private Set<Character> alfabeto;
+    private int estadoInicial;
+    private Set<Integer> estadosFinais;
+    private List<Transicao> transicoes;
+
+    // Construtor da classe. Inicializa os conjuntos de estados, alfabeto e transições.
+    public SimuladorAutomatoFinito() {
+        estados = new HashSet<>();
+        alfabeto = new HashSet<>();
+        estadosFinais = new HashSet<>();
+        transicoes = new ArrayList<>();
+    }
+
+    // Define o alfabeto do autômato.
+    public void definirAlfabeto(Set<Character> alfabeto) {
+        this.alfabeto = alfabeto;
+    }
+
+    // Adiciona um estado ao conjunto de estados do autômato.
+    public void adicionarEstado(int estado) {
+        estados.add(estado);
+    }
+
+    // Adiciona uma transição ao autômato. Define a partir de qual estado, utilizando
+    // determinado símbolo, o autômato alcança um estado destino.
+    public void adicionarTransicao(int estadoOrigem, char simbolo, int estadoDestino) {
+        // Verifica se os estados e o símbolo da transição estão definidos corretamente.
+        if (!estados.contains(estadoOrigem) || !estados.contains(estadoDestino)) {
+            throw new IllegalArgumentException("Estado não definido no conjunto de estados.");
+        }
+        if (simbolo != 'ε' && !alfabeto.contains(simbolo)) {
+            throw new IllegalArgumentException("Símbolo não definido no alfabeto.");
+        }
+
+        // Cria uma nova transição e a adiciona à lista de transições.
+        transicoes.add(new Transicao(estadoOrigem, simbolo, estadoDestino));
+    }
+
+    // Define o estado inicial do autômato.
+    public void definirEstadoInicial(int estado) {
+        if (!estados.contains(estado)) {
+            throw new IllegalArgumentException("Estado inicial não definido no conjunto de estados.");
+        }
+        this.estadoInicial = estado;
+    }
+
+    // Adiciona um estado final ao conjunto de estados finais do autômato.
+    public void adicionarEstadoFinal(int estado) {
+        if (!estados.contains(estado)) {
+            throw new IllegalArgumentException("Estado final não definido no conjunto de estados.");
+        }
+        estadosFinais.add(estado);
+    }
+
+    // Processa uma cadeia de entrada no autômato e verifica se ela é aceita ou rejeitada.
+    public boolean processar(String entrada) {
+        int estadoAtual = estadoInicial;
+        for (char simbolo : entrada.toCharArray()) {
+            estadoAtual = obterProximoEstado(estadoAtual, simbolo);
+            if (estadoAtual == -1) {
+                return false;
+            }
+        }
+        return estadosFinais.contains(estadoAtual);
+    }
+
+   // Método auxiliar para obter o próximo estado com base no estado atual e no símbolo.
+private int obterProximoEstado(int estadoAtual, char simbolo) {
+    for (Transicao transicao : transicoes) {
+        if (transicao.estadoOrigem == estadoAtual && transicao.simbolo == simbolo) {
+            return transicao.estadoDestino;
+        }
+    }
+    return estadoAtual; // Retorna o estado atual se não houver uma transição válida.
+}
+
+    // Método para formatar as transições de estado
+    private String formatarTransicoes() {
+        StringBuilder resultadoFormatado = new StringBuilder();
+
+        for (Transicao transicao : transicoes) {
+            resultadoFormatado.append(transicao.estadoOrigem).append(" --(").append(transicao.simbolo).append(")--> ").append(transicao.estadoDestino).append("\n");
+        }
+
+        return resultadoFormatado.toString();
+    }
+
+    // Método para processar uma lista de entradas e salvar os resultados no arquivo de saída.
+    public void processarListaDeEntrada(List<String> listaDeEntrada, String nomeArquivoSaida) {
+        StringBuilder construtorResultado = new StringBuilder();
+
+        // Processar cada cadeia de entrada e armazenar os resultados e transições de estado.
+        for (String entrada : listaDeEntrada) {
+            int estadoAtual = estadoInicial;
+            construtorResultado.append("Cadeia \"").append(entrada).append("\": ");
+
+            for (char simbolo : entrada.toCharArray()) {
+                construtorResultado.append(estadoAtual).append(" --(").append(simbolo).append(")--> ");
+                estadoAtual = obterProximoEstado(estadoAtual, simbolo);
+                construtorResultado.append(estadoAtual).append(" | ");
+            }
+
+            boolean resultado = estadosFinais.contains(estadoAtual);
+            construtorResultado.append(resultado ? "ACEITA" : "REJEITA").append("\n");
+        }
+
+        // Classificar o autômato e adicionar a classificação no resultado.
+        construtorResultado.append(classificarAutomato()).append("\n");
+
+        // Adicionar as transições de estado formatadas no resultado.
+        construtorResultado.append("Transições de Estado:\n");
+        construtorResultado.append(formatarTransicoes());
+
+        // Escrever o resultado no arquivo de saída.
+        try {
+            FileWriter escritorArquivo = new FileWriter(nomeArquivoSaida);
+            escritorArquivo.write(construtorResultado.toString());
+            escritorArquivo.close();
+            System.out.println("Resultados salvos no arquivo \"" + nomeArquivoSaida + "\".");
+        } catch (IOException e) {
+            System.err.println("Erro ao escrever no arquivo de saída.");
+            e.printStackTrace();
+        }
+    }
+
+    // Método para classificar o tipo de autômato (AFD, AFN ou AFN-ε) após o processamento completo.
+private String classificarAutomato() {
+    boolean isAFD = true;
+    boolean temTransicoesVazias = false;
+    Set<Character> todosSimbolos = new HashSet<>();
+
+    for (Transicao transicao : transicoes) {
+        todosSimbolos.add(transicao.simbolo);
+
+        if (transicao.simbolo == 'ε') {
+            temTransicoesVazias = true;
+        }
+    }
+
+    for (int estado : estados) {
+        Set<Character> simbolosEstado = new HashSet<>();
+        boolean temTransicaoVazia = false;
+
+        for (Transicao transicao : transicoes) {
+            if (transicao.estadoOrigem == estado) {
+                if (transicao.simbolo != 'ε') {
+                    if (simbolosEstado.contains(transicao.simbolo)) {
+                        isAFD = false;
+                        break;
+                    } else {
+                        simbolosEstado.add(transicao.simbolo);
+                    }
+                } else {
+                    temTransicaoVazia = true;
+                }
+            }
+        }
+
+        if (!isAFD) {
+            break;
+        }
+
+        if (temTransicaoVazia && simbolosEstado.size() > 0) {
+            isAFD = false;
+            break;
+        }
+    }
+
+    if (isAFD) {
+        return "O autômato é um AFD.";
+    } else if (temTransicoesVazias) {
+        return "O autômato é um AFN-ε.";
+    } else {
+        return "O autômato é um AFN.";
+    }
+}
+
+    // Classe interna que representa uma transição do autômato.
+    private class Transicao {
+        int estadoOrigem;
+        char simbolo;
+        int estadoDestino;
+
+        Transicao(int estadoOrigem, char simbolo, int estadoDestino) {
+            this.estadoOrigem = estadoOrigem;
+            this.simbolo = simbolo;
+            this.estadoDestino = estadoDestino;
+        }
+    }
+}
