@@ -1,4 +1,3 @@
-Esse codigo recebe uma palavra qualquer e avalia se essa entrada atende aos requisitos: 
-tamanho mínimo e máximo; conter pelo menos um número e uma letra maiúscula. 
-A saída é "ACEITA" ou "REJEITA". 
-O arquivo de texto "entradas e saídas" contem alguns exemplos de entradas já testadas e suas respectivas saídas; Podem ser usadas para comparação caso seja feita alguma alteração nos parâmetros de transição do autômato.
+Essa classe em java permite a criação de qualquer automato finito (AFD, AFN, AFNε).
+Recebendo o alfabeto, estados (inicial e final(ais)), as transições de estado, e as cadeias de entrada (palavras) por linhas de comando.
+A saída é um arquivo de texto formatado com as palavras de entrada, suas respectivas transições, resultado e também a classificação do tipo de automato ao final.
