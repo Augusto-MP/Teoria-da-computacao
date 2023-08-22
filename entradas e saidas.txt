@@ -1,8 +1,0 @@
-aka -> rejeita
-abacatao -> rejeita
-Abacatao -> rejeita
-abacatao20 -> rejeita
-Abacatao20 -> aceita
-20abacataO -> aceita
-abaCA20tao -> aceita
-Prof. Dellamura 2021 -> aceita
