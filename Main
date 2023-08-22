@@ -1,0 +1,41 @@
+import java.util.Arrays;
+import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+
+public class Main {
+    public static void main(String[] args) {
+        // Exemplo de um autômato AFD - Automato1
+        SimuladorAutomatoFinito automato1 = new SimuladorAutomatoFinito();
+
+        // Definir o alfabeto {0, 1}
+        Set<Character> alfabeto1 = new HashSet<>(Arrays.asList('0', '1'));
+        automato1.definirAlfabeto(alfabeto1);
+
+        // Adicionar estados
+        automato1.adicionarEstado(0);
+        automato1.adicionarEstado(1);
+        automato1.adicionarEstado(2);
+
+        // Definir estado inicial
+        automato1.definirEstadoInicial(0);
+
+        // Adicionar estados finais
+        automato1.adicionarEstadoFinal(2);
+
+        // Adicionar transições
+        automato1.adicionarTransicao(0, '0', 1);
+        automato1.adicionarTransicao(0, '1', 0);
+        automato1.adicionarTransicao(1, '0', 1);
+        automato1.adicionarTransicao(1, '1', 2);
+
+        // Cadeias de entrada para o Automato1 (AFD)
+        List<String> cadeiasDeEntrada1 = Arrays.asList("01", "0101", "101010", "1", "0", "ε");
+
+        // Processar a lista de entrada do Automato1 e salvar os resultados no arquivo "saida_automato1.txt"
+        automato1.processarListaDeEntrada(cadeiasDeEntrada1, "saida_automatoNEW11.txt");
+
+
+        
+    }
+}
